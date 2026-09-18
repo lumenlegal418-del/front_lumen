@@ -1,0 +1,14 @@
+.pagina {
+  width: 100%;
+  max-width: 1600px;
+  margin: 0 auto;
+  padding: 0 32px 50px;
+  box-sizing: border-box;
+}
+
+
+h1 {
+  text-align: center;
+  font-size: 2.75rem;
+  margin-top: 2rem;
+}

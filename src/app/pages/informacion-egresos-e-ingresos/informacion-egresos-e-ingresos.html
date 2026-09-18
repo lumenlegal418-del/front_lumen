@@ -1,0 +1,50 @@
+```html
+<app-header />
+<app-navbar />
+
+<main class="pagina">
+
+    <h1>Información Ingresos e Egresos</h1>
+
+            <section>
+            <h2>Ingresos Información Clientes</h2>
+
+            <app-filters
+                [filters]="filtrosIngresos()"
+                (apply)="onAplicarFiltrosIngresos($event)"
+                (clear)="onLimpiarFiltrosIngresos()"
+            />
+
+            <app-table
+                [columns]="ingresosColumns"
+                [data]="ingresosData()"
+            />
+            </section>
+
+
+        <section>
+        <h2>Egresos Información Gastos Fijos y Varios</h2>
+
+        <app-filters
+            [filters]="filtrosEgresosGastos()"
+            (apply)="onAplicarFiltrosEgresosGastos($event)"
+            (clear)="onLimpiarFiltrosEgresosGastos()"
+        />
+
+        <app-table
+            [columns]="egresosGastosColumns"
+            [data]="egresosGastosData()"
+        />
+        </section>
+
+    <section> 
+        <h2>Egresos Información Empleados</h2> 
+        <app-filters [filters]="filtrosEgresosEmpleados()" 
+        (apply)="onAplicarFiltrosEgresosEmpleados($event)" 
+        (clear)="onLimpiarFiltrosEgresosEmpleados()" /> 
+        
+        <app-table [columns]="egresosEmpleadosColumns" 
+        [data]="egresosEmpleadosData()" /> </section>
+
+</main>
+

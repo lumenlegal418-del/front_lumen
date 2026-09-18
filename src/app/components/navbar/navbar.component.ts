@@ -14,6 +14,7 @@ export class NavbarComponent {
     { label: 'Cierre Financiero', path: '/cierre-financiero' },
     { label: 'Presupuesto', path: '/presupuesto' },
     { label: 'Clientes', path: '/clientes' },
+    {label: 'Informacion Ingresos e Egresos', path:'/informacion-egresos-e-ingresos'},
     { label: 'Ingresar Información', path: '/ingresar-informacion' },
   ];
 
