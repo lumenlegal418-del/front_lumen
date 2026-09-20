@@ -1,13 +1,18 @@
 <section class="table-card">
+
   @if (title()) {
-    <h3 class="table-card__title">{{ title() }}</h3>
+    <h3 class="table-card__title">
+      {{ title() }}
+    </h3>
   }
 
   <div class="table-card__scroll">
+
     <table class="table-card__table">
 
       <thead>
         <tr>
+
           @for (column of columns(); track column.key) {
             <th
               class="table-card__th"
@@ -16,12 +21,21 @@
               {{ column.label }}
             </th>
           }
+
+          @if (selectable()) {
+            <th class="table-card__th">
+              Seleccionar
+            </th>
+          }
+
         </tr>
       </thead>
 
       <tbody>
+
         @for (row of data(); track $index) {
           <tr class="table-card__row">
+
             @for (column of columns(); track column.key) {
               <td
                 class="table-card__td"
@@ -30,28 +44,53 @@
                 {{ format(row[column.key], column.type) }}
               </td>
             }
+
+            @if (selectable()) {
+              <td class="table-card__td">
+                <input
+                  type="radio"
+                  name="selectedRow"
+                  (change)="rowSelected.emit(row)"
+                />
+              </td>
+            }
+
           </tr>
         }
+
       </tbody>
 
-      <!-- FILA DE TOTALES -->
       <tfoot>
-  <tr class="table-card__total-row">
-    @for (column of columns(); track column.key) {
-      <td
-        class="table-card__td table-card__total-cell"
-        [class.table-card__cell--right]="isNumeric(column.type)"
-      >
-        @if (column.key === 'nombre') {
-          <strong>Total</strong>
-        } @else if (column.total) {
-          <strong>{{ formatTotal(column) }}</strong>
-        }
-      </td>
-    }
-  </tr>
-</tfoot>
+        <tr class="table-card__total-row">
+
+          @for (column of columns(); track column.key) {
+            <td
+              class="table-card__td table-card__total-cell"
+              [class.table-card__cell--right]="isNumeric(column.type)"
+            >
+
+              @if (column.key === 'nombre') {
+                <strong>Total</strong>
+              }
+
+              @else if (column.total) {
+                <strong>
+                  {{ formatTotal(column) }}
+                </strong>
+              }
+
+            </td>
+          }
+
+          @if (selectable()) {
+            <td class="table-card__td table-card__total-cell"></td>
+          }
+
+        </tr>
+      </tfoot>
 
     </table>
+
   </div>
+
 </section>

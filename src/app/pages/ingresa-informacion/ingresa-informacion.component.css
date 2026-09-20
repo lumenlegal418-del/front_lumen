@@ -90,3 +90,45 @@ h1 {
   transform: translateY(-2px);
   box-shadow: 0 4px 12px rgba(111, 78, 55, 0.3);
 }
+
+.btn-reentrenar {
+  padding: 0.65rem 1.5rem;
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: #ffffff;
+  background-color: #4E3524;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: background-color 0.2s ease, opacity 0.2s ease;
+}
+
+.btn-reentrenar:hover:not(:disabled) {
+  background-color: #3D2B1D;
+}
+
+.btn-reentrenar:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.btn-descargar {
+  padding: 0.65rem 1.5rem;
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: #ffffff;
+  background-color: #4E3524;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: background-color 0.2s ease, opacity 0.2s ease;
+}
+
+.btn-descargar:hover:not(:disabled) {
+  background-color: #3D2B1D;
+}
+
+.btn-descargar:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}

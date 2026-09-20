@@ -30,10 +30,48 @@ export class MovimientosService {
     skip = 0,
     limit = 500
   ): Observable<DetalleMovimientoDto[]> {
-    let params = new HttpParams().set('ano', ano).set('mes', mes).set('skip', skip).set('limit', limit);
+    let params = new HttpParams()
+      .set('ano', ano)
+      .set('mes', mes)
+      .set('skip', skip)
+      .set('limit', limit);
+
     if (nombreDocumento) {
       params = params.set('nombre_documento', nombreDocumento);
     }
-    return this.http.get<DetalleMovimientoDto[]>(`${this.baseUrl}/detalle`, { params });
+
+    return this.http.get<DetalleMovimientoDto[]>(
+      `${this.baseUrl}/detalle`,
+      { params }
+    );
   }
+
+  eliminarMovimientos(
+    nombreArchivo: string,
+    ano: string,
+    mes: string
+  ): Observable<any> {
+
+    const params = new HttpParams()
+      .set('nombre_archivo', nombreArchivo)
+      .set('ano', ano)
+      .set('mes', mes);
+
+    return this.http.delete(
+      `${environment.apiUrl}/eliminar/movimientos`,
+      { params }
+    );
+  }
+
+  cargarExcel(archivo: File): Observable<any> {
+    const formData = new FormData();
+
+    formData.append('archivo', archivo);
+
+    return this.http.post(
+      `${environment.apiUrl}/carga/excel`,
+      formData
+    );
+}
+
 }

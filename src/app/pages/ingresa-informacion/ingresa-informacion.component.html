@@ -5,16 +5,17 @@
   <h1>Ingresar Información</h1>
 
   <section class="contenido-wrapper">
-    <div class="seccion-archivos">
-      <app-file-list
-        title="Archivos"
-        [archivos]="archivos()"
-        [(selectedFile)]="selectedFile"
-        (fileSelected)="onArchivoSeleccionado($event)"
-      />
-    </div>
 
-```
+
+<div class="seccion-archivos">
+  <app-file-list
+    title="Archivos"
+    [archivos]="archivos()"
+    [(selectedFile)]="selectedFile"
+    (fileSelected)="onArchivoSeleccionado($event)"
+  />
+</div>
+
 <div class="seccion-tabla">
   @if (selectedFile()) {
     <app-table
@@ -28,27 +29,68 @@
     </div>
   }
 </div>
-```
+
 
   </section>
 
   <section class="botones-accion">
-    <button
-      class="btn btn-eliminar"
-      [disabled]="!selectedFile()"
-      (click)="onEliminarDocumento()"
-    >
-      Eliminar Documento
-    </button>
 
-```
+
+<!-- ELIMINAR DOCUMENTO -->
 <button
-  class="btn btn-agregar"
-  (click)="onAgregarDocumento()"
+  type="button"
+  class="btn btn-eliminar"
+  [disabled]="!selectedFile()"
+  (click)="onEliminarDocumento()"
 >
-  Agregar Documento
+  Eliminar Documento
 </button>
-```
+
+<!-- CARGAR DATOS -->
+<input
+  #archivoInput
+  type="file"
+  accept=".xlsx"
+  hidden
+  (change)="onCargarDatos($event)"
+/>
+
+<button
+  type="button"
+  class="btn btn-agregar"
+  [disabled]="cargandoArchivo()"
+  (click)="archivoInput.click()"
+>
+  {{
+    cargandoArchivo()
+      ? 'Cargando datos...'
+      : 'Cargar datos'
+  }}
+</button>
+
+<button
+  type="button"
+  class="btn btn-descargar"
+  [disabled]="!selectedFile() || tablaData().length === 0"
+  (click)="onDescargarTabla()"
+>
+  Descargar información
+</button>
+
+<!-- REENTRENAR MODELOS -->
+<button
+  type="button"
+  class="btn-reentrenar"
+  [disabled]="reentrenando()"
+  (click)="onReentrenarModelos()"
+>
+  {{
+    reentrenando()
+      ? 'Reentrenando modelos...'
+      : 'Reentrenar modelos'
+  }}
+</button>
+
 
   </section>
 </main>

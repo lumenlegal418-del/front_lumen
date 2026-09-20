@@ -1,4 +1,4 @@
-import { Component, input } from '@angular/core';
+import { Component, input, output } from '@angular/core';
 
 export type TableColumnType =
   | 'text'
@@ -27,29 +27,32 @@ export class TableComponent {
   readonly columns = input<TableColumn[]>([]);
   readonly data = input<TableRow[]>([]);
 
-  protected isNumeric(type?: TableColumnType): boolean {
-  return type === 'number' || type === 'currency' || type === 'percentage';
-}
+  // Selección de filas: desactivada por defecto
+  readonly selectable = input<boolean>(false);
 
-protected getTotal(column: TableColumn): number {
-  if (!column.total) {
-    return 0;
+  readonly rowSelected = output<TableRow>();
+
+  protected isNumeric(type?: TableColumnType): boolean {
+    return type === 'number' || type === 'currency' || type === 'percentage';
   }
 
-  return this.data().reduce((total, row) => {
-    const value = Number(row[column.key]);
+  protected getTotal(column: TableColumn): number {
+    if (!column.total) return 0;
 
-    if (Number.isNaN(value)) {
-      return total;
-    }
+    return this.data().reduce((total, row) => {
+      const value = Number(row[column.key]);
 
-    return total + value;
-  }, 0);
-}
+      if (Number.isNaN(value)) {
+        return total;
+      }
 
-protected formatTotal(column: TableColumn): string {
-  return this.format(this.getTotal(column), column.type);
-}
+      return total + value;
+    }, 0);
+  }
+
+  protected formatTotal(column: TableColumn): string {
+    return this.format(this.getTotal(column), column.type);
+  }
 
   protected format(value: unknown, type?: TableColumnType): string {
     if (value === null || value === undefined || value === '') {
@@ -74,9 +77,6 @@ protected formatTotal(column: TableColumn): string {
     }
   }
 
-  
-
-  // Números y monedas: SIEMPRE 0 decimales
   private formatNumber(amount: number): string {
     if (Number.isNaN(amount)) {
       return '—';
@@ -88,7 +88,6 @@ protected formatTotal(column: TableColumn): string {
     }).format(amount);
   }
 
-  // Porcentajes: máximo 1 decimal
   private formatPercentage(amount: number): string {
     if (Number.isNaN(amount)) {
       return '—';
@@ -101,7 +100,9 @@ protected formatTotal(column: TableColumn): string {
   }
 
   private formatDate(value: unknown): string {
-    const date = value instanceof Date ? value : new Date(String(value));
+    const date = value instanceof Date
+      ? value
+      : new Date(String(value));
 
     if (Number.isNaN(date.getTime())) {
       return String(value);

@@ -1,14 +1,16 @@
-import { Component, OnInit, signal } from '@angular/core';
+import { Component, OnInit, signal, inject } from '@angular/core';
+import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 
 import { HeaderComponent } from '../../components/header/header.component';
 import { NavbarComponent } from '../../components/navbar/navbar.component';
+
 import {
   TableColumn,
   TableComponent,
   TableRow,
 } from '../../components/table/table.component';
 
-import {MovimientosMetadataService,EstadoCliente} from '../../services/movimientos-metadata.service';
+import {MovimientosMetadataService,EstadoCliente,RegistrosEgresos,Empleados,CrearRegistroEgreso,CrearEmpleado} from '../../services/movimientos-metadata.service';
 
 
 
@@ -25,6 +27,7 @@ import {
     NavbarComponent,
     FiltersComponent,
     TableComponent,
+    ReactiveFormsModule,
   ],
   templateUrl: './informacion-egresos-e-ingresos.html',
   styleUrl: './informacion-egresos-e-ingresos.css',
@@ -307,7 +310,7 @@ private cargarEmpleados(): void {
 }
 
 
-
+//ingresos
 
 protected readonly filtrosIngresos = signal<FilterConfig[]>([
   {
@@ -410,9 +413,112 @@ protected readonly ingresosColumns: TableColumn[] = [
     type: 'text'
   },
 ];
+protected readonly ingresoSeleccionado =
+  signal<EstadoCliente | null>(null);
+
+protected onIngresoSeleccionado(
+  registro: TableRow
+): void {
+  const estadoCliente: EstadoCliente = {
+    nombre_tercero: String(registro['nombre_tercero']),
+    ano_inicio: String(registro['ano_inicio']),
+    mes_inicio: String(registro['mes_inicio']),
+    ano_fin: String(registro['ano_fin']),
+    mes_fin: String(registro['mes_fin']),
+    estado: String(registro['estado']),
+  };
+
+  this.ingresoSeleccionado.set(estadoCliente);
+}
+protected eliminarIngreso(): void {
+  const registro = this.ingresoSeleccionado();
+
+  if (!registro) {
+    return;
+  }
+
+  this.movimientosMetadataService
+    .eliminarEstadoCliente(registro)
+    .subscribe({
+      next: () => {
+        console.log('Ingreso eliminado correctamente');
+
+        this.ingresoSeleccionado.set(null);
+
+        this.cargarEstadosClientes();
+      },
+      error: (error) => {
+        console.error('Error al eliminar el ingreso:', error);
+      }
+    });
+}
+protected readonly mostrarFormularioIngresoSignal =signal(false);
+
+protected mostrarFormularioIngreso(): void {this.mostrarFormularioIngresoSignal.set(true);}
+
+protected cancelarFormularioIngreso(): void {this.mostrarFormularioIngresoSignal.set(false);}
+private fb = inject(FormBuilder);
+
+protected readonly formularioIngreso = this.fb.group({
+  nombre_tercero: ['', Validators.required],
+  ano_inicio: ['', Validators.required],
+  mes_inicio: ['', Validators.required],
+  ano_fin: ['', Validators.required],
+  mes_fin: ['', Validators.required],
+  estado: ['', Validators.required],
+});
+
+protected crearIngreso(): void {
+
+  if (this.formularioIngreso.invalid) {
+    return;
+  }
+
+  const nuevoIngreso: EstadoCliente = {
+    nombre_tercero:
+      this.formularioIngreso.value.nombre_tercero ?? '',
+
+    ano_inicio:
+      this.formularioIngreso.value.ano_inicio ?? '',
+
+    mes_inicio:
+      this.formularioIngreso.value.mes_inicio ?? '',
+
+    ano_fin:
+      this.formularioIngreso.value.ano_fin ?? '',
+
+    mes_fin:
+      this.formularioIngreso.value.mes_fin ?? '',
+
+    estado:
+      this.formularioIngreso.value.estado ?? '',
+  };
+
+  this.movimientosMetadataService
+    .crearEstadoCliente(nuevoIngreso)
+    .subscribe({
+      next: () => {
+
+        console.log('Ingreso creado correctamente');
+
+        this.formularioIngreso.reset();
+
+        this.mostrarFormularioIngresoSignal.set(false);
+
+        this.cargarEstadosClientes();
+      },
+
+      error: (error) => {
+        console.error(
+          'Error al crear el ingreso:',
+          error
+        );
+      }
+    });
+}
 
 
-
+//egresos
 protected readonly filtrosEgresosGastos = signal<FilterConfig[]>([
   {
     name: 'nombre_cuenta',
@@ -492,6 +598,7 @@ protected readonly filtrosEgresosGastos = signal<FilterConfig[]>([
   }
 
   protected readonly egresosGastosData = signal<TableRow[]>([]);
+  protected readonly egresoGastoSeleccionado = signal<RegistrosEgresos | null>(null);
 
   protected readonly egresosGastosColumns: TableColumn[] = [
   {
@@ -511,9 +618,103 @@ protected readonly filtrosEgresosGastos = signal<FilterConfig[]>([
   },
 ];
 
+protected onEgresoGastoSeleccionado(
+  registro: TableRow
+): void {
+  const egresoGasto: RegistrosEgresos = {
+    id: Number(registro['id']),
+    nombre_cuenta: String(registro['nombre_cuenta']),
+    clasificacion_nombre_cuenta: String(
+      registro['clasificacion_nombre_cuenta']
+    ),
+    tipo_egreso: String(registro['tipo_egreso']),
+  };
+
+  this.egresoGastoSeleccionado.set(egresoGasto);
+}
+protected eliminarEgresoGasto(): void {
+  const registro = this.egresoGastoSeleccionado();
+
+  if (!registro) {
+    return;
+  }
+
+  this.movimientosMetadataService
+    .eliminarRegistroEgreso(registro)
+    .subscribe({
+      next: () => {
+        console.log('Egreso eliminado correctamente');
+
+        this.egresoGastoSeleccionado.set(null);
+
+        this.cargarRegistrosEgresos();
+      },
+      error: (error) => {
+        console.error(
+          'Error al eliminar el egreso:',
+          error
+        );
+      }
+    });
+}
+
+protected readonly formularioEgresoGastoVisible = signal(false);
+
+protected readonly formularioEgresoGasto = this.fb.group({
+  nombre_cuenta: ['', Validators.required],
+  clasificacion_nombre_cuenta: ['', Validators.required],
+  tipo_egreso: ['', Validators.required],
+});
+
+protected mostrarFormularioEgresoGasto(): void {
+  this.formularioEgresoGastoVisible.set(true);
+}
+
+protected cancelarFormularioEgresoGasto(): void {
+  this.formularioEgresoGastoVisible.set(false);
+  this.formularioEgresoGasto.reset();
+}
+
+protected crearEgresoGasto(): void {
+  if (this.formularioEgresoGasto.invalid) {
+    return;
+  }
+
+  const nuevoEgreso: CrearRegistroEgreso = {
+    nombre_cuenta:
+      this.formularioEgresoGasto.value.nombre_cuenta ?? '',
+
+    clasificacion_nombre_cuenta:
+      this.formularioEgresoGasto.value.clasificacion_nombre_cuenta ?? '',
+
+    tipo_egreso:
+      this.formularioEgresoGasto.value.tipo_egreso ?? '',
+  };
+
+  this.movimientosMetadataService
+    .crearRegistroEgreso(nuevoEgreso)
+    .subscribe({
+      next: () => {
+        console.log('Egreso creado correctamente');
+
+        this.formularioEgresoGasto.reset();
+
+        this.formularioEgresoGastoVisible.set(false);
+
+        this.cargarRegistrosEgresos();
+      },
+
+      error: (error) => {
+        console.error(
+          'Error al crear el egreso:',
+          error
+        );
+      }
+    });
+}
 
 
-
+//empleados
 
 protected readonly filtrosEgresosEmpleados = signal<FilterConfig[]>([
   {
@@ -580,6 +781,8 @@ protected onLimpiarFiltrosEgresosEmpleados(): void {
   // Más adelante aquí volveremos a cargar
   // la información inicial de empleados.
 }
+
+protected readonly egresoEmpleadoSeleccionado =signal<Empleados | null>(null);
 protected readonly egresosEmpleadosData = signal<TableRow[]>([]);
 
 protected readonly egresosEmpleadosColumns: TableColumn[] = [
@@ -595,6 +798,95 @@ protected readonly egresosEmpleadosColumns: TableColumn[] = [
   },
 ];
 
+protected onEgresoEmpleadoSeleccionado(
+  registro: TableRow
+): void {
+  const empleado: Empleados = {
+    id: Number(registro['id']),
+    nombre_tercero: String(registro['nombre_tercero']),
+    tipo_egreso: String(registro['tipo_egreso']),
+  };
 
+  this.egresoEmpleadoSeleccionado.set(empleado);
 }
 
+protected eliminarEgresoEmpleado(): void {
+  const registro = this.egresoEmpleadoSeleccionado();
+
+  if (!registro) {
+    return;
+  }
+
+  this.movimientosMetadataService
+    .eliminarEmpleado(registro)
+    .subscribe({
+      next: () => {
+        console.log('Empleado eliminado correctamente');
+
+        this.egresoEmpleadoSeleccionado.set(null);
+
+        this.cargarEmpleados();
+      },
+      error: (error) => {
+        console.error(
+          'Error al eliminar el empleado:',
+          error
+        );
+      }
+    });
+}
+
+protected readonly formularioEgresoEmpleadoVisible =
+  signal(false);
+
+protected readonly formularioEgresoEmpleado =
+  this.fb.group({
+    nombre_tercero: ['', Validators.required],
+    tipo_egreso: ['', Validators.required],
+  });
+
+protected mostrarFormularioEgresoEmpleado(): void {
+  this.formularioEgresoEmpleadoVisible.set(true);
+}
+
+protected cancelarFormularioEgresoEmpleado(): void {
+  this.formularioEgresoEmpleadoVisible.set(false);
+  this.formularioEgresoEmpleado.reset();
+}
+
+protected crearEgresoEmpleado(): void {
+  if (this.formularioEgresoEmpleado.invalid) {
+    return;
+  }
+
+  const nuevoEmpleado: CrearEmpleado = {
+    nombre_tercero:
+      this.formularioEgresoEmpleado.value.nombre_tercero ?? '',
+
+    tipo_egreso:
+      this.formularioEgresoEmpleado.value.tipo_egreso ?? '',
+  };
+
+  this.movimientosMetadataService
+    .crearEmpleado(nuevoEmpleado)
+    .subscribe({
+      next: () => {
+        console.log('Empleado creado correctamente');
+
+        this.formularioEgresoEmpleado.reset();
+
+        this.formularioEgresoEmpleadoVisible.set(false);
+
+        this.cargarEmpleados();
+      },
+
+      error: (error) => {
+        console.error(
+          'Error al crear el empleado:',
+          error
+        );
+      }
+    });
+}
+
+}

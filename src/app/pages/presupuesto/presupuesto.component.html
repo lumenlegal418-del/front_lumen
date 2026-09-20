@@ -10,16 +10,6 @@
     (clear)="onLimpiarFiltros()"
   />
 
-  <div class="acciones-modelo">
-    <button
-      type="button"
-      class="btn-reentrenar"
-      [disabled]="reentrenando()"
-      (click)="onReentrenarModelos()"
-    >
-      {{ reentrenando() ? 'Reentrenando modelos...' : 'Reentrenar modelos' }}
-    </button>
-  </div>
 
   <section class="egresos">
     <h2 class="egresos__title">Egresos</h2>

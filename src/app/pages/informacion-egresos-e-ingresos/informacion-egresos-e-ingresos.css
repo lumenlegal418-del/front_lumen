@@ -6,9 +6,377 @@
   box-sizing: border-box;
 }
 
+/* =========================================
+   TÍTULOS
+   ========================================= */
 
 h1 {
   text-align: center;
   font-size: 2.75rem;
   margin-top: 2rem;
+}
+
+h2 {
+  text-align: center;
+  font-size: 1.8rem;
+  margin: 3rem 0 1.5rem;
+}
+
+/* =========================================
+   SECCIONES
+   ========================================= */
+
+section {
+  margin-bottom: 4rem;
+}
+
+/* =========================================
+   BOTONES DE ACCIONES DE LA TABLA
+   ========================================= */
+
+.acciones-tabla {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 1rem;
+
+  margin-top: 1.5rem;
+  margin-bottom: 1rem;
+}
+
+.acciones-tabla button {
+  padding: 0.7rem 1.4rem;
+
+  border: none;
+  border-radius: 8px;
+
+  background-color: #7a3e16;
+  color: white;
+
+  font-size: 0.95rem;
+  font-weight: 600;
+
+  cursor: pointer;
+
+  transition:
+    background-color 0.2s ease,
+    transform 0.15s ease,
+    box-shadow 0.2s ease;
+}
+
+.acciones-tabla button:hover:not(:disabled) {
+  background-color: #5f2f10;
+
+  transform: translateY(-1px);
+
+  box-shadow:
+    0 4px 10px rgba(0, 0, 0, 0.12);
+}
+
+.acciones-tabla button:disabled {
+  background-color: #d1d1d1;
+  color: #777;
+
+  cursor: not-allowed;
+}
+
+/* =========================================
+   MODAL - FONDO
+   ========================================= */
+
+.modal-overlay {
+  position: fixed;
+
+  inset: 0;
+
+  z-index: 1000;
+
+  display: flex;
+
+  align-items: center;
+  justify-content: center;
+
+  padding: 1.5rem;
+
+  box-sizing: border-box;
+
+  background-color: rgba(0, 0, 0, 0.45);
+
+  backdrop-filter: blur(5px);
+  -webkit-backdrop-filter: blur(5px);
+}
+
+/* =========================================
+   FORMULARIO DENTRO DEL MODAL
+   ========================================= */
+
+.formulario-ingreso,
+.formulario-egreso-gasto,
+.formulario-egreso-empleado {
+  width: 100%;
+  max-width: 850px;
+
+  max-height: 90vh;
+
+  overflow-y: auto;
+
+  padding: 2rem;
+
+  box-sizing: border-box;
+
+  background-color: #ffffff;
+
+  border: 1px solid #e5e5e5;
+
+  border-radius: 14px;
+
+  box-shadow:
+    0 20px 50px rgba(0, 0, 0, 0.2);
+
+  animation: aparecerModal 0.2s ease-out;
+}
+
+/* =========================================
+   ANIMACIÓN
+   ========================================= */
+
+@keyframes aparecerModal {
+  from {
+    opacity: 0;
+    transform: translateY(10px) scale(0.98);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+/* =========================================
+   TÍTULO DEL FORMULARIO
+   ========================================= */
+
+.formulario-ingreso h3,
+.formulario-egreso-gasto h3,
+.formulario-egreso-empleado h3 {
+  margin: 0 0 1.5rem;
+
+  text-align: center;
+
+  font-size: 1.35rem;
+  font-weight: 600;
+
+  color: #2b160b;
+}
+
+/* =========================================
+   FORMULARIO
+   ========================================= */
+
+.formulario-ingreso form,
+.formulario-egreso-gasto form,
+.formulario-egreso-empleado form {
+  display: grid;
+
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+
+  gap: 1.25rem 1.5rem;
+}
+
+/* =========================================
+   CAMPOS
+   ========================================= */
+
+.formulario-ingreso form > div,
+.formulario-egreso-gasto form > div,
+.formulario-egreso-empleado form > div {
+  display: flex;
+
+  flex-direction: column;
+
+  gap: 0.45rem;
+}
+
+.formulario-ingreso label,
+.formulario-egreso-gasto label,
+.formulario-egreso-empleado label {
+  font-size: 0.9rem;
+
+  font-weight: 600;
+
+  color: #3a3a3a;
+}
+
+/* =========================================
+   INPUTS Y SELECTS
+   ========================================= */
+
+.formulario-ingreso input,
+.formulario-ingreso select,
+.formulario-egreso-gasto input,
+.formulario-egreso-gasto select,
+.formulario-egreso-empleado input,
+.formulario-egreso-empleado select {
+  width: 100%;
+
+  box-sizing: border-box;
+
+  padding: 0.75rem 0.9rem;
+
+  border: 1px solid #d5d5d5;
+
+  border-radius: 8px;
+
+  background-color: #ffffff;
+
+  color: #333;
+
+  font-size: 0.95rem;
+
+  outline: none;
+
+  transition:
+    border-color 0.2s ease,
+    box-shadow 0.2s ease;
+}
+
+/* =========================================
+   FOCUS
+   ========================================= */
+
+.formulario-ingreso input:focus,
+.formulario-ingreso select:focus,
+.formulario-egreso-gasto input:focus,
+.formulario-egreso-gasto select:focus,
+.formulario-egreso-empleado input:focus,
+.formulario-egreso-empleado select:focus {
+  border-color: #b8651b;
+
+  box-shadow:
+    0 0 0 3px rgba(184, 101, 27, 0.12);
+}
+
+/* =========================================
+   PLACEHOLDER
+   ========================================= */
+
+.formulario-ingreso input::placeholder,
+.formulario-egreso-gasto input::placeholder,
+.formulario-egreso-empleado input::placeholder {
+  color: #999;
+}
+
+/* =========================================
+   BOTONES DEL FORMULARIO
+   ========================================= */
+
+.formulario-ingreso form button,
+.formulario-egreso-gasto form button,
+.formulario-egreso-empleado form button {
+  padding: 0.75rem 1.2rem;
+
+  border: none;
+
+  border-radius: 8px;
+
+  font-size: 0.95rem;
+
+  font-weight: 600;
+
+  cursor: pointer;
+
+  transition:
+    background-color 0.2s ease,
+    transform 0.15s ease;
+}
+
+/* =========================================
+   GUARDAR
+   ========================================= */
+
+.formulario-ingreso form button[type="submit"],
+.formulario-egreso-gasto form button[type="submit"],
+.formulario-egreso-empleado form button[type="submit"] {
+  background-color: #7a3e16;
+
+  color: white;
+}
+
+.formulario-ingreso form button[type="submit"]:hover:not(:disabled),
+.formulario-egreso-gasto form button[type="submit"]:hover:not(:disabled),
+.formulario-egreso-empleado form button[type="submit"]:hover:not(:disabled) {
+  background-color: #5f2f10;
+
+  transform: translateY(-1px);
+}
+
+.formulario-ingreso form button[type="submit"]:disabled,
+.formulario-egreso-gasto form button[type="submit"]:disabled,
+.formulario-egreso-empleado form button[type="submit"]:disabled {
+  background-color: #cccccc;
+
+  color: #777;
+
+  cursor: not-allowed;
+}
+
+/* =========================================
+   CANCELAR
+   ========================================= */
+
+.formulario-ingreso form button[type="button"],
+.formulario-egreso-gasto form button[type="button"],
+.formulario-egreso-empleado form button[type="button"] {
+  background-color: #eeeeee;
+
+  color: #444;
+}
+
+.formulario-ingreso form button[type="button"]:hover,
+.formulario-egreso-gasto form button[type="button"]:hover,
+.formulario-egreso-empleado form button[type="button"]:hover {
+  background-color: #dddddd;
+}
+
+/* =========================================
+   RESPONSIVE
+   ========================================= */
+
+@media (max-width: 768px) {
+
+  .pagina {
+    padding: 0 18px 40px;
+  }
+
+  h1 {
+    font-size: 2.1rem;
+  }
+
+  h2 {
+    font-size: 1.5rem;
+  }
+
+  .acciones-tabla {
+    flex-direction: column;
+
+    gap: 0.7rem;
+  }
+
+  .acciones-tabla button {
+    width: 100%;
+    max-width: 300px;
+  }
+
+  .formulario-ingreso,
+  .formulario-egreso-gasto,
+  .formulario-egreso-empleado {
+    padding: 1.25rem;
+    max-height: 85vh;
+  }
+
+  .formulario-ingreso form,
+  .formulario-egreso-gasto form,
+  .formulario-egreso-empleado form {
+    grid-template-columns: 1fr;
+  }
 }

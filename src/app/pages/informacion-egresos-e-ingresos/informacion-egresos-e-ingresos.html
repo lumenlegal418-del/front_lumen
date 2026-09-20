@@ -1,50 +1,383 @@
-```html
 <app-header />
 <app-navbar />
 
 <main class="pagina">
 
-    <h1>Información Ingresos e Egresos</h1>
+  <h1>Información Ingresos e Egresos</h1>
 
-            <section>
-            <h2>Ingresos Información Clientes</h2>
+  <!-- =====================================================
+       INGRESOS - INFORMACIÓN CLIENTES
+       ===================================================== -->
 
-            <app-filters
-                [filters]="filtrosIngresos()"
-                (apply)="onAplicarFiltrosIngresos($event)"
-                (clear)="onLimpiarFiltrosIngresos()"
-            />
+  <section>
 
-            <app-table
-                [columns]="ingresosColumns"
-                [data]="ingresosData()"
-            />
-            </section>
+    <h2>Ingresos Información Clientes</h2>
+
+    <app-filters
+      [filters]="filtrosIngresos()"
+      (apply)="onAplicarFiltrosIngresos($event)"
+      (clear)="onLimpiarFiltrosIngresos()"
+    />
+
+    <app-table
+      [columns]="ingresosColumns"
+      [data]="ingresosData()"
+      [selectable]="true"
+      (rowSelected)="onIngresoSeleccionado($event)"
+    />
+
+    <div class="acciones-tabla">
+
+      <button
+        type="button"
+        [disabled]="!ingresoSeleccionado()"
+        (click)="eliminarIngreso()"
+      >
+        Eliminar seleccionado
+      </button>
+
+      <button
+        type="button"
+        (click)="mostrarFormularioIngreso()"
+      >
+        Agregar ingreso
+      </button>
+
+    </div>
+
+    @if (mostrarFormularioIngresoSignal()) {
+
+      <div class="modal-overlay">
+
+        <div class="formulario-ingreso">
+
+          <h3>Agregar ingreso</h3>
+
+          <form
+            [formGroup]="formularioIngreso"
+            (ngSubmit)="crearIngreso()"
+          >
+
+            <div>
+              <label>Nombre tercero</label>
+
+              <input
+                type="text"
+                formControlName="nombre_tercero"
+                placeholder="Nombre del tercero"
+              />
+            </div>
+
+            <div>
+              <label>Año inicio</label>
+
+              <input
+                type="text"
+                formControlName="ano_inicio"
+                placeholder="Ej. 2026"
+              />
+            </div>
+
+            <div>
+              <label>Mes inicio</label>
+
+              <input
+                type="text"
+                formControlName="mes_inicio"
+                placeholder="Ej. Enero"
+              />
+            </div>
+
+            <div>
+              <label>Año fin</label>
+
+              <input
+                type="text"
+                formControlName="ano_fin"
+                placeholder="Ej. 2026"
+              />
+            </div>
+
+            <div>
+              <label>Mes fin</label>
+
+              <input
+                type="text"
+                formControlName="mes_fin"
+                placeholder="Ej. Diciembre"
+              />
+            </div>
+
+            <div>
+              <label>Estado</label>
+
+              <select formControlName="estado">
+
+                <option value="">
+                  Seleccione un estado
+                </option>
+
+                <option value="Vigente">
+                  Vigente
+                </option>
+
+                <option value="Finalizado">
+                  Finalizado
+                </option>
+
+              </select>
+            </div>
+
+            <button
+              type="submit"
+              [disabled]="formularioIngreso.invalid"
+            >
+              Guardar ingreso
+            </button>
+
+            <button
+              type="button"
+              (click)="cancelarFormularioIngreso()"
+            >
+              Cancelar
+            </button>
+
+          </form>
+
+        </div>
+
+      </div>
+
+    }
+
+  </section>
 
 
-        <section>
-        <h2>Egresos Información Gastos Fijos y Varios</h2>
+  <!-- =====================================================
+       EGRESOS - GASTOS FIJOS Y VARIOS
+       ===================================================== -->
 
-        <app-filters
-            [filters]="filtrosEgresosGastos()"
-            (apply)="onAplicarFiltrosEgresosGastos($event)"
-            (clear)="onLimpiarFiltrosEgresosGastos()"
-        />
+  <section>
 
-        <app-table
-            [columns]="egresosGastosColumns"
-            [data]="egresosGastosData()"
-        />
-        </section>
+    <h2>Egresos Información Gastos Fijos y Varios</h2>
 
-    <section> 
-        <h2>Egresos Información Empleados</h2> 
-        <app-filters [filters]="filtrosEgresosEmpleados()" 
-        (apply)="onAplicarFiltrosEgresosEmpleados($event)" 
-        (clear)="onLimpiarFiltrosEgresosEmpleados()" /> 
-        
-        <app-table [columns]="egresosEmpleadosColumns" 
-        [data]="egresosEmpleadosData()" /> </section>
+    <app-filters
+      [filters]="filtrosEgresosGastos()"
+      (apply)="onAplicarFiltrosEgresosGastos($event)"
+      (clear)="onLimpiarFiltrosEgresosGastos()"
+    />
+
+    <app-table
+      [columns]="egresosGastosColumns"
+      [data]="egresosGastosData()"
+      [selectable]="true"
+      (rowSelected)="onEgresoGastoSeleccionado($event)"
+    />
+
+    <div class="acciones-tabla">
+
+      <button
+        type="button"
+        [disabled]="!egresoGastoSeleccionado()"
+        (click)="eliminarEgresoGasto()"
+      >
+        Eliminar seleccionado
+      </button>
+
+      <button
+        type="button"
+        (click)="mostrarFormularioEgresoGasto()"
+      >
+        Agregar gasto
+      </button>
+
+    </div>
+
+    @if (formularioEgresoGastoVisible()) {
+
+      <div class="modal-overlay">
+
+        <div class="formulario-egreso-gasto">
+
+          <h3>Agregar gasto</h3>
+
+          <form
+            [formGroup]="formularioEgresoGasto"
+            (ngSubmit)="crearEgresoGasto()"
+          >
+
+            <div>
+              <label>Nombre cuenta</label>
+
+              <input
+                type="text"
+                formControlName="nombre_cuenta"
+                placeholder="Nombre de la cuenta"
+              />
+            </div>
+
+            <div>
+              <label>Clasificación</label>
+
+              <input
+                type="text"
+                formControlName="clasificacion_nombre_cuenta"
+                placeholder="Clasificación de la cuenta"
+              />
+            </div>
+
+            <div>
+              <label>Tipo de egreso</label>
+
+              <select formControlName="tipo_egreso">
+
+                <option value="">
+                  Seleccione un tipo
+                </option>
+
+                <option value="Fijo">
+                  Fijo
+                </option>
+
+                <option value="Vario">
+                  Vario
+                </option>
+
+              </select>
+
+            </div>
+
+            <button
+              type="submit"
+              [disabled]="formularioEgresoGasto.invalid"
+            >
+              Guardar gasto
+            </button>
+
+            <button
+              type="button"
+              (click)="cancelarFormularioEgresoGasto()"
+            >
+              Cancelar
+            </button>
+
+          </form>
+
+        </div>
+
+      </div>
+
+    }
+
+  </section>
+
+
+  <!-- =====================================================
+       EGRESOS - EMPLEADOS
+       ===================================================== -->
+
+  <section>
+
+    <h2>Egresos Información Empleados</h2>
+
+    <app-filters
+      [filters]="filtrosEgresosEmpleados()"
+      (apply)="onAplicarFiltrosEgresosEmpleados($event)"
+      (clear)="onLimpiarFiltrosEgresosEmpleados()"
+    />
+
+    <app-table
+      [columns]="egresosEmpleadosColumns"
+      [data]="egresosEmpleadosData()"
+      [selectable]="true"
+      (rowSelected)="onEgresoEmpleadoSeleccionado($event)"
+    />
+
+    <div class="acciones-tabla">
+
+      <button
+        type="button"
+        [disabled]="!egresoEmpleadoSeleccionado()"
+        (click)="eliminarEgresoEmpleado()"
+      >
+        Eliminar seleccionado
+      </button>
+
+      <button
+        type="button"
+        (click)="mostrarFormularioEgresoEmpleado()"
+      >
+        Agregar empleado
+      </button>
+
+    </div>
+
+    @if (formularioEgresoEmpleadoVisible()) {
+
+      <div class="modal-overlay">
+
+        <div class="formulario-egreso-empleado">
+
+          <h3>Agregar empleado</h3>
+
+          <form
+            [formGroup]="formularioEgresoEmpleado"
+            (ngSubmit)="crearEgresoEmpleado()"
+          >
+
+            <div>
+              <label>Empleado</label>
+
+              <input
+                type="text"
+                formControlName="nombre_tercero"
+                placeholder="Nombre del empleado"
+              />
+            </div>
+
+            <div>
+              <label>Tipo de egreso</label>
+
+              <select formControlName="tipo_egreso">
+
+                <option value="">
+                  Seleccione un tipo
+                </option>
+
+                <option value="Fijo">
+                  Fijo
+                </option>
+
+                <option value="Vario">
+                  Vario
+                </option>
+
+              </select>
+
+            </div>
+
+            <button
+              type="submit"
+              [disabled]="formularioEgresoEmpleado.invalid"
+            >
+              Guardar empleado
+            </button>
+
+            <button
+              type="button"
+              (click)="cancelarFormularioEgresoEmpleado()"
+            >
+              Cancelar
+            </button>
+
+          </form>
+
+        </div>
+
+      </div>
+
+    }
+
+  </section>
 
 </main>
-
