@@ -8,149 +8,164 @@
   <!-- =====================================================
        INGRESOS - INFORMACIÓN CLIENTES
        ===================================================== -->
+<section>
 
-  <section>
+  <h2>Ingresos Información Clientes</h2>
 
-    <h2>Ingresos Información Clientes</h2>
+  <app-filters
+    [filters]="filtrosIngresos()"
+    (apply)="onAplicarFiltrosIngresos($event)"
+    (clear)="onLimpiarFiltrosIngresos()"
+  />
 
-    <app-filters
-      [filters]="filtrosIngresos()"
-      (apply)="onAplicarFiltrosIngresos($event)"
-      (clear)="onLimpiarFiltrosIngresos()"
-    />
+  <app-table
+    [columns]="ingresosColumns"
+    [data]="ingresosData()"
+    [selectable]="true"
+    (rowSelected)="onIngresoSeleccionado($event)"
+  />
 
-    <app-table
-      [columns]="ingresosColumns"
-      [data]="ingresosData()"
-      [selectable]="true"
-      (rowSelected)="onIngresoSeleccionado($event)"
-    />
+  <div class="acciones-tabla">
 
-    <div class="acciones-tabla">
+    <button
+      type="button"
+      [disabled]="!ingresoSeleccionado()"
+      (click)="eliminarIngreso()"
+    >
+      Eliminar seleccionado
+    </button>
 
-      <button
-        type="button"
-        [disabled]="!ingresoSeleccionado()"
-        (click)="eliminarIngreso()"
-      >
-        Eliminar seleccionado
-      </button>
+    <button
+      type="button"
+      (click)="mostrarFormularioIngreso()"
+    >
+      Agregar ingreso
+    </button>
 
-      <button
-        type="button"
-        (click)="mostrarFormularioIngreso()"
-      >
-        Agregar ingreso
-      </button>
+  </div>
 
-    </div>
+  @if (mostrarFormularioIngresoSignal()) {
 
-    @if (mostrarFormularioIngresoSignal()) {
+    <div class="modal-overlay">
 
-      <div class="modal-overlay">
+      <div class="formulario-ingreso">
 
-        <div class="formulario-ingreso">
+        <h3>Agregar ingreso</h3>
 
-          <h3>Agregar ingreso</h3>
+        <form
+          [formGroup]="formularioIngreso"
+          (ngSubmit)="crearIngreso()"
+        >
 
-          <form
-            [formGroup]="formularioIngreso"
-            (ngSubmit)="crearIngreso()"
+          <div>
+            <label>Nombre tercero</label>
+
+            <input
+              type="text"
+              formControlName="nombre_tercero"
+              placeholder="Nombre del tercero"
+            />
+          </div>
+
+          <div>
+            <label>Año inicio</label>
+
+            <input
+              type="text"
+              formControlName="ano_inicio"
+              placeholder="Ej. 2026"
+            />
+          </div>
+
+          <div>
+            <label>Mes inicio</label>
+
+            <select formControlName="mes_inicio">
+
+              <option value="">
+                Seleccione un mes
+              </option>
+
+              @for (mes of meses; track mes.valor) {
+                <option [value]="mes.valor">
+                  {{ mes.nombre }}
+                </option>
+              }
+
+            </select>
+          </div>
+
+          <div>
+            <label>Año fin</label>
+
+            <input
+              type="text"
+              formControlName="ano_fin"
+              placeholder="Ej. 2026"
+            />
+          </div>
+
+          <div>
+            <label>Mes fin</label>
+
+            <select formControlName="mes_fin">
+
+              <option value="">
+                Seleccione un mes
+              </option>
+
+              @for (mes of meses; track mes.valor) {
+                <option [value]="mes.valor">
+                  {{ mes.nombre }}
+                </option>
+              }
+
+            </select>
+          </div>
+
+          <div>
+            <label>Estado</label>
+
+            <select formControlName="estado">
+
+              <option value="">
+                Seleccione un estado
+              </option>
+
+              <option value="Vigente">
+                Vigente
+              </option>
+
+              <option value="Finalizado">
+                Finalizado
+              </option>
+
+            </select>
+          </div>
+
+          <button
+            type="submit"
+            [disabled]="formularioIngreso.invalid"
           >
+            Guardar ingreso
+          </button>
 
-            <div>
-              <label>Nombre tercero</label>
+          <button
+            type="button"
+            (click)="cancelarFormularioIngreso()"
+          >
+            Cancelar
+          </button>
 
-              <input
-                type="text"
-                formControlName="nombre_tercero"
-                placeholder="Nombre del tercero"
-              />
-            </div>
-
-            <div>
-              <label>Año inicio</label>
-
-              <input
-                type="text"
-                formControlName="ano_inicio"
-                placeholder="Ej. 2026"
-              />
-            </div>
-
-            <div>
-              <label>Mes inicio</label>
-
-              <input
-                type="text"
-                formControlName="mes_inicio"
-                placeholder="Ej. Enero"
-              />
-            </div>
-
-            <div>
-              <label>Año fin</label>
-
-              <input
-                type="text"
-                formControlName="ano_fin"
-                placeholder="Ej. 2026"
-              />
-            </div>
-
-            <div>
-              <label>Mes fin</label>
-
-              <input
-                type="text"
-                formControlName="mes_fin"
-                placeholder="Ej. Diciembre"
-              />
-            </div>
-
-            <div>
-              <label>Estado</label>
-
-              <select formControlName="estado">
-
-                <option value="">
-                  Seleccione un estado
-                </option>
-
-                <option value="Vigente">
-                  Vigente
-                </option>
-
-                <option value="Finalizado">
-                  Finalizado
-                </option>
-
-              </select>
-            </div>
-
-            <button
-              type="submit"
-              [disabled]="formularioIngreso.invalid"
-            >
-              Guardar ingreso
-            </button>
-
-            <button
-              type="button"
-              (click)="cancelarFormularioIngreso()"
-            >
-              Cancelar
-            </button>
-
-          </form>
-
-        </div>
+        </form>
 
       </div>
 
-    }
+    </div>
 
-  </section>
+  }
+
+</section>
 
 
   <!-- =====================================================

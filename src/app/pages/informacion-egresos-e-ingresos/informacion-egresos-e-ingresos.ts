@@ -61,9 +61,9 @@ private cargarEstadosClientes(): void {
         const filas: TableRow[] = respuesta.map((item) => ({
           nombre_tercero: item.nombre_tercero,
           ano_inicio: item.ano_inicio,
-          mes_inicio: item.mes_inicio,
+          mes_inicio: this.obtenerNombreMes(item.mes_inicio),
           ano_fin: item.ano_fin,
-          mes_fin: item.mes_fin,
+          mes_fin: this.obtenerNombreMes(item.mes_fin),
           estado: item.estado,
         }));
 
@@ -309,7 +309,50 @@ private cargarEmpleados(): void {
     });
 }
 
+private obtenerNombreMes(mes: number | string | null): string {
+  const meses: Record<string, string> = {
+    '1': 'Enero',
+    '2': 'Febrero',
+    '3': 'Marzo',
+    '4': 'Abril',
+    '5': 'Mayo',
+    '6': 'Junio',
+    '7': 'Julio',
+    '8': 'Agosto',
+    '9': 'Septiembre',
+    '10': 'Octubre',
+    '11': 'Noviembre',
+    '12': 'Diciembre',
+  };
 
+  return meses[String(mes)] ?? '';
+}
+
+private obtenerNumeroMes(mes: string | number | null): string {
+  const meses: Record<string, string> = {
+    enero: '1',
+    febrero: '2',
+    marzo: '3',
+    abril: '4',
+    mayo: '5',
+    junio: '6',
+    julio: '7',
+    agosto: '8',
+    septiembre: '9',
+    octubre: '10',
+    noviembre: '11',
+    diciembre: '12',
+  };
+
+  const valor = String(mes ?? '').trim().toLowerCase();
+
+  // Si ya viene como número, lo dejamos igual
+  if (/^(?:[1-9]|1[0-2])$/.test(valor)) {
+    return valor;
+  }
+
+  return meses[valor] ?? '';
+}
 //ingresos
 
 protected readonly filtrosIngresos = signal<FilterConfig[]>([
@@ -356,9 +399,9 @@ protected onAplicarFiltrosIngresos(
         const filas: TableRow[] = respuesta.map((item) => ({
           nombre_tercero: item.nombre_tercero,
           ano_inicio: item.ano_inicio,
-          mes_inicio: item.mes_inicio,
+          mes_inicio: this.obtenerNombreMes(item.mes_inicio),
           ano_fin: item.ano_fin,
-          mes_fin: item.mes_fin,
+          mes_fin: this.obtenerNombreMes(item.mes_fin),
           estado: item.estado,
         }));
 
@@ -416,20 +459,23 @@ protected readonly ingresosColumns: TableColumn[] = [
 protected readonly ingresoSeleccionado =
   signal<EstadoCliente | null>(null);
 
+
 protected onIngresoSeleccionado(
   registro: TableRow
 ): void {
   const estadoCliente: EstadoCliente = {
     nombre_tercero: String(registro['nombre_tercero']),
     ano_inicio: String(registro['ano_inicio']),
-    mes_inicio: String(registro['mes_inicio']),
+    mes_inicio: this.obtenerNumeroMes(String(registro['mes_inicio'] ?? '')),
     ano_fin: String(registro['ano_fin']),
-    mes_fin: String(registro['mes_fin']),
+    mes_fin: this.obtenerNumeroMes(String(registro['mes_fin'] ?? '')),
     estado: String(registro['estado']),
   };
 
   this.ingresoSeleccionado.set(estadoCliente);
 }
+
+
 protected eliminarIngreso(): void {
   const registro = this.ingresoSeleccionado();
 
@@ -458,6 +504,21 @@ protected mostrarFormularioIngreso(): void {this.mostrarFormularioIngresoSignal.
 
 protected cancelarFormularioIngreso(): void {this.mostrarFormularioIngresoSignal.set(false);}
 private fb = inject(FormBuilder);
+
+protected readonly meses = [
+  { valor: '1', nombre: 'Enero' },
+  { valor: '2', nombre: 'Febrero' },
+  { valor: '3', nombre: 'Marzo' },
+  { valor: '4', nombre: 'Abril' },
+  { valor: '5', nombre: 'Mayo' },
+  { valor: '6', nombre: 'Junio' },
+  { valor: '7', nombre: 'Julio' },
+  { valor: '8', nombre: 'Agosto' },
+  { valor: '9', nombre: 'Septiembre' },
+  { valor: '10', nombre: 'Octubre' },
+  { valor: '11', nombre: 'Noviembre' },
+  { valor: '12', nombre: 'Diciembre' },
+];
 
 protected readonly formularioIngreso = this.fb.group({
   nombre_tercero: ['', Validators.required],
