@@ -364,7 +364,7 @@ protected readonly composicionEgresosFijosTabla = computed<TableRow[]>(() => {
       plata: item.monto
     }))
     .sort((a, b) => b.plata - a.plata)
-    .slice(0, 7);
+    //.slice(0, 7);
 });
 
 protected readonly composicionEgresosVariablesTabla = computed<TableRow[]>(() => {
@@ -377,7 +377,7 @@ protected readonly composicionEgresosVariablesTabla = computed<TableRow[]>(() =>
       plata: item.monto
     }))
     .sort((a, b) => b.plata - a.plata)
-    .slice(0, 7);
+    //.slice(0, 7);
 });
 
   protected readonly composicionEgresosColumns: TableColumn[] = [
