@@ -16,18 +16,18 @@
 
     <div class="egresos__graficas">
       <app-time-series
-        title="Gastos Real vs Presupuesto"
+        title="Egresos Varios vs Presupuesto"
         [months]="meses"
-        [series]="gastoRealVsPresupuesto()"
+        [series]="egresoVariableRealVsPresupuesto()"
         yAxisLabel="Valor"
         [currency]="true"
         [showLegend]="true"
       />
 
       <app-time-series
-        title="Costos Real vs Presupuesto"
+        title="Egresos Fijos vs Presupuesto"
         [months]="meses"
-        [series]="costosRealVsPresupuesto()"
+        [series]="egresoFijoRealVsPresupuesto()"
         yAxisLabel="Valor"
         [currency]="true"
         [showLegend]="true"

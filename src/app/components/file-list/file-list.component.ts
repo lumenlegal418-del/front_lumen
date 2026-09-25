@@ -1,4 +1,11 @@
-import { Component, input, model, output, signal } from '@angular/core';
+import {
+  Component,
+  computed,
+  input,
+  model,
+  output,
+  signal,
+} from '@angular/core';
 
 export interface ArchivoCatalogo {
   nombreArchivo: string;
@@ -20,28 +27,75 @@ export interface SeleccionArchivo {
 })
 export class FileListComponent {
   readonly title = input<string>('Lista Archivos');
+
   readonly archivos = input<ArchivoCatalogo[]>([]);
+
   readonly selectedFile = model<string | null>(null);
 
-  // mes puntual seleccionado, para distinguirlo de otros meses del mismo archivo
+  // Mes puntual seleccionado, para distinguirlo
+  // de otros meses del mismo archivo.
   protected readonly selectedMes = signal<string | null>(null);
 
   readonly fileSelected = output<SeleccionArchivo>();
 
-  // año expandido actualmente en el acordeón (null = todos colapsados)
+  // Año expandido actualmente en el acordeón.
+  // null = todos los años colapsados.
   protected readonly expandido = signal<string | null>(null);
 
-  protected toggle(nombreArchivo: string): void {
-    this.expandido.update((actual) => (actual === nombreArchivo ? null : nombreArchivo));
+  protected readonly archivosPorAnio = computed(() => {
+    const grupos = new Map<string, ArchivoCatalogo[]>();
+
+    for (const archivo of this.archivos()) {
+      const existentes = grupos.get(archivo.anio) ?? [];
+
+      existentes.push(archivo);
+
+      grupos.set(archivo.anio, existentes);
+    }
+
+    return Array.from(grupos.entries()).map(([anio, archivos]) => ({
+      anio,
+      archivos,
+    }));
+  });
+
+  /**
+   * Expande o contrae un año.
+   */
+  protected toggle(anio: string): void {
+    this.expandido.update((actual) =>
+      actual === anio ? null : anio
+    );
   }
 
-  protected isActivo(archivo: ArchivoCatalogo, mes: string): boolean {
-    return archivo.nombreArchivo === this.selectedFile() && mes === this.selectedMes();
+  /**
+   * Determina si un mes está actualmente seleccionado.
+   */
+  protected isActivo(
+    archivo: ArchivoCatalogo,
+    mes: string
+  ): boolean {
+    return (
+      archivo.nombreArchivo === this.selectedFile() &&
+      mes === this.selectedMes()
+    );
   }
 
-  protected select(archivo: ArchivoCatalogo, mes: string): void {
+  /**
+   * Selecciona un archivo/mes.
+   */
+  protected select(
+    archivo: ArchivoCatalogo,
+    mes: string
+  ): void {
     this.selectedFile.set(archivo.nombreArchivo);
+
     this.selectedMes.set(mes);
-    this.fileSelected.emit({ nombreArchivo: archivo.nombreArchivo, anio: archivo.anio, mes });
+
+    this.fileSelected.emit({
+      nombreArchivo: archivo.nombreArchivo,
+      anio: archivo.anio,
+      mes,
+    });
   }
 }

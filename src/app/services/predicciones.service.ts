@@ -9,7 +9,7 @@ export interface PrediccionMesDto {
   valor_predicho: number;
 }
 
-export type Clasificacion = 'GASTOS' | 'COSTOS' | 'Ingreso fijo' | 'Ingreso vario';
+export type Clasificacion = 'Egreso fijo' | 'Egreso variable' | 'Ingreso fijo' | 'Ingreso vario';
 
 export interface RecalculoPrediccionDto {
   clasificacion: Clasificacion;

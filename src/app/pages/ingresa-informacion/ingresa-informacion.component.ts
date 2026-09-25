@@ -63,8 +63,8 @@ export class IngresaInformacionComponent implements OnInit {
     this.reentrenando.set(true);
 
     forkJoin([
-      this.prediccionesService.recalcular('GASTOS'),
-      this.prediccionesService.recalcular('COSTOS'),
+      this.prediccionesService.recalcular('Egreso fijo'),
+      this.prediccionesService.recalcular('Egreso variable'),
       this.prediccionesService.recalcular('Ingreso fijo'),
       this.prediccionesService.recalcular('Ingreso vario'),
     ]).subscribe({

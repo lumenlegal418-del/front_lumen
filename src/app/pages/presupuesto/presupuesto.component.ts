@@ -24,12 +24,13 @@ import { PrediccionesService } from '../../services/predicciones.service';
   styleUrl: './presupuesto.component.css',
 })
 export class PresupuestoComponent implements OnInit {
-  protected readonly gastosRealApi = signal<RegistroMensualDto | null>(null);
-  protected readonly costosRealApi = signal<RegistroMensualDto | null>(null);
+  protected readonly egresoFijoRealApi = signal<RegistroMensualDto | null>(null);
+  protected readonly egresoVarioRealApi = signal<RegistroMensualDto | null>(null);
   protected readonly ingresoFijoRealApi = signal<RegistroMensualDto | null>(null);
   protected readonly ingresoVarioRealApi = signal<RegistroMensualDto | null>(null);
-  protected readonly gastosPrediccionApi = signal<Record<string, number> | null>(null);
-  protected readonly costosPrediccionApi = signal<Record<string, number> | null>(null);
+
+  protected readonly egresoFijoPrediccionApi = signal<Record<string, number> | null>(null);
+  protected readonly egresoVarioPrediccionApi = signal<Record<string, number> | null>(null);
   protected readonly ingresoFijoPrediccionApi = signal<Record<string, number> | null>(null);
   protected readonly ingresoVarioPrediccionApi = signal<Record<string, number> | null>(null);
   protected readonly reentrenando = signal<boolean>(false);
@@ -40,31 +41,32 @@ export class PresupuestoComponent implements OnInit {
     private readonly prediccionesService: PrediccionesService
   ) {}
 
-  ngOnInit(): void {
-    this.cargarGastosReal(this.anioActualLabel());
-    this.cargarCostosReal(this.anioActualLabel());
-    this.cargarIngresoFijoReal(this.anioActualLabel());
-    this.cargarIngresoVarioReal(this.anioActualLabel());
-    this.cargarGastosPrediccion(this.anioActualLabel());
-    this.cargarCostosPrediccion(this.anioActualLabel());
-    this.cargarIngresoFijoPrediccion(this.anioActualLabel());
-    this.cargarIngresoVarioPrediccion(this.anioActualLabel());
-  }
+ngOnInit(): void {
+  this.cargarEgresoFijoReal(this.anioActualLabel());
+  this.cargarEgresoVarioReal(this.anioActualLabel());
+  this.cargarIngresoFijoReal(this.anioActualLabel());
+  this.cargarIngresoVarioReal(this.anioActualLabel());
+
+  this.cargarEgresoFijoPrediccion(this.anioActualLabel());
+  this.cargarEgresoVarioPrediccion(this.anioActualLabel());
+  this.cargarIngresoFijoPrediccion(this.anioActualLabel());
+  this.cargarIngresoVarioPrediccion(this.anioActualLabel());
+}
 
   private anioActualLabel(): string {
     return new Date().getFullYear().toString();
   }
 
-  private cargarGastosReal(anio: string): void {
+  private cargarEgresoFijoReal(anio: string): void {
     this.visualizacionesService
-      .getTotalPorClasificacionAnual(anio, 'GASTOS')
-      .subscribe((registro) => this.gastosRealApi.set(registro));
+      .getRegistroEgresosPorTipo(anio, 'Egreso fijo')
+      .subscribe((registro) => this.egresoFijoRealApi.set(registro));
   }
 
-  private cargarCostosReal(anio: string): void {
+  private cargarEgresoVarioReal(anio: string): void {
     this.visualizacionesService
-      .getTotalPorClasificacionAnual(anio, 'COSTOS')
-      .subscribe((registro) => this.costosRealApi.set(registro));
+      .getRegistroEgresosPorTipo(anio, 'Egreso variable')
+      .subscribe((registro) => this.egresoVarioRealApi.set(registro));
   }
 
   private cargarIngresoFijoReal(anio: string): void {
@@ -79,16 +81,16 @@ export class PresupuestoComponent implements OnInit {
       .subscribe((registro) => this.ingresoVarioRealApi.set(registro));
   }
 
-  private cargarGastosPrediccion(anio: string): void {
+  private cargarEgresoFijoPrediccion(anio: string): void {
     this.prediccionesService
-      .getPredicciones('GASTOS', anio)
-      .subscribe((prediccion) => this.gastosPrediccionApi.set(prediccion));
+      .getPredicciones('Egreso fijo', anio)
+      .subscribe((prediccion) => this.egresoFijoPrediccionApi.set(prediccion));
   }
 
-  private cargarCostosPrediccion(anio: string): void {
+  private cargarEgresoVarioPrediccion(anio: string): void {
     this.prediccionesService
-      .getPredicciones('COSTOS', anio)
-      .subscribe((prediccion) => this.costosPrediccionApi.set(prediccion));
+      .getPredicciones('Egreso variable', anio)
+      .subscribe((prediccion) => this.egresoVarioPrediccionApi.set(prediccion));
   }
 
   private cargarIngresoFijoPrediccion(anio: string): void {
@@ -109,14 +111,14 @@ export class PresupuestoComponent implements OnInit {
     }
     this.reentrenando.set(true);
     forkJoin([
-      this.prediccionesService.recalcular('GASTOS'),
-      this.prediccionesService.recalcular('COSTOS'),
+      this.prediccionesService.recalcular('Egreso fijo'),
+      this.prediccionesService.recalcular('Egreso variable'),
       this.prediccionesService.recalcular('Ingreso fijo'),
       this.prediccionesService.recalcular('Ingreso vario'),
     ]).subscribe({
       next: () => {
-        this.cargarGastosPrediccion(this.anioSeleccionado);
-        this.cargarCostosPrediccion(this.anioSeleccionado);
+        this.cargarEgresoFijoPrediccion(this.anioSeleccionado);
+        this.cargarEgresoVarioPrediccion(this.anioSeleccionado);
         this.cargarIngresoFijoPrediccion(this.anioSeleccionado);
         this.cargarIngresoVarioPrediccion(this.anioSeleccionado);
         this.reentrenando.set(false);
@@ -142,12 +144,12 @@ export class PresupuestoComponent implements OnInit {
     console.log('Filtros aplicados:', valores);
     if (valores['anio']) {
       this.anioSeleccionado = valores['anio'];
-      this.cargarGastosReal(valores['anio']);
-      this.cargarCostosReal(valores['anio']);
+      this.cargarEgresoFijoReal(valores['anio']);
+      this.cargarEgresoVarioReal(valores['anio']);
       this.cargarIngresoFijoReal(valores['anio']);
       this.cargarIngresoVarioReal(valores['anio']);
-      this.cargarGastosPrediccion(valores['anio']);
-      this.cargarCostosPrediccion(valores['anio']);
+      this.cargarEgresoFijoPrediccion(valores['anio']);
+      this.cargarEgresoVarioPrediccion(valores['anio']);
       this.cargarIngresoFijoPrediccion(valores['anio']);
       this.cargarIngresoVarioPrediccion(valores['anio']);
     }
@@ -155,12 +157,12 @@ export class PresupuestoComponent implements OnInit {
 
   protected onLimpiarFiltros(): void {
     this.anioSeleccionado = this.anioActualLabel();
-    this.cargarGastosReal(this.anioActualLabel());
-    this.cargarCostosReal(this.anioActualLabel());
+    this.cargarEgresoFijoReal(this.anioActualLabel())
+    this.cargarEgresoVarioReal(this.anioActualLabel())
     this.cargarIngresoFijoReal(this.anioActualLabel());
     this.cargarIngresoVarioReal(this.anioActualLabel());
-    this.cargarGastosPrediccion(this.anioActualLabel());
-    this.cargarCostosPrediccion(this.anioActualLabel());
+    this.cargarEgresoFijoPrediccion(this.anioActualLabel())
+    this.cargarEgresoVarioPrediccion(this.anioActualLabel())
     this.cargarIngresoFijoPrediccion(this.anioActualLabel());
     this.cargarIngresoVarioPrediccion(this.anioActualLabel());
   }
@@ -197,21 +199,35 @@ export class PresupuestoComponent implements OnInit {
     },
   ];
 
-  protected readonly gastoRealVsPresupuesto = computed<TimeSeries[]>(() => {
-    const real = this.gastosRealApi();
-    const prediccion = this.gastosPrediccionApi();
+  protected readonly egresoFijoRealVsPresupuesto = computed<TimeSeries[]>(() => {
+    const real = this.egresoFijoRealApi();
+    const prediccion = this.egresoFijoPrediccionApi();
+
     return [
-      { name: 'Gasto real', data: this.meses.map((mes) => real?.[mes] ?? 0) },
-      { name: 'Gasto esperado', data: this.meses.map((mes) => prediccion?.[mes] ?? 0) },
+      {
+        name: 'Egreso fijo real',
+        data: this.meses.map((mes) => real?.[mes] ?? 0),
+      },
+      {
+        name: 'Egreso fijo esperado',
+        data: this.meses.map((mes) => prediccion?.[mes] ?? 0),
+      },
     ];
   });
 
-  protected readonly costosRealVsPresupuesto = computed<TimeSeries[]>(() => {
-    const real = this.costosRealApi();
-    const prediccion = this.costosPrediccionApi();
+  protected readonly egresoVariableRealVsPresupuesto = computed<TimeSeries[]>(() => {
+    const real = this.egresoVarioRealApi();
+    const prediccion = this.egresoVarioPrediccionApi();
+
     return [
-      { name: 'Costo real', data: this.meses.map((mes) => real?.[mes] ?? 0) },
-      { name: 'Costo esperado', data: this.meses.map((mes) => prediccion?.[mes] ?? 0) },
+      {
+        name: 'Egreso vario real',
+        data: this.meses.map((mes) => real?.[mes] ?? 0),
+      },
+      {
+        name: 'Egreso vario esperado',
+        data: this.meses.map((mes) => prediccion?.[mes] ?? 0),
+      },
     ];
   });
 

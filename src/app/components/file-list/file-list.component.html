@@ -2,45 +2,77 @@
   <h3 class="file-list__title">{{ title() }}</h3>
 
   <ul class="file-list__years">
-    @for (archivo of archivos(); track archivo.nombreArchivo) {
+
+    <!-- Recorrer los años agrupados -->
+    @for (grupo of archivosPorAnio(); track grupo.anio) {
       <li class="file-list__year">
+
+        <!-- Encabezado del año -->
         <button
           type="button"
           class="file-list__year-header"
-          [class.file-list__year-header--active]="archivo.nombreArchivo === selectedFile()"
-          [attr.aria-expanded]="expandido() === archivo.nombreArchivo"
-          (click)="toggle(archivo.nombreArchivo)"
+          [class.file-list__year-header--active]="expandido() === grupo.anio"
+          [attr.aria-expanded]="expandido() === grupo.anio"
+          (click)="toggle(grupo.anio)"
         >
-          <span>Información {{ archivo.anio }}</span>
+          <span>
+            Información {{ grupo.anio }}
+          </span>
+
           <span
             class="file-list__chevron"
-            [class.file-list__chevron--open]="expandido() === archivo.nombreArchivo"
+            [class.file-list__chevron--open]="expandido() === grupo.anio"
             aria-hidden="true"
-            >▾</span
           >
+            ▾
+          </span>
         </button>
 
-        @if (expandido() === archivo.nombreArchivo) {
+        <!-- Mostrar los archivos y meses del año seleccionado -->
+        @if (expandido() === grupo.anio) {
           <ul class="file-list__meses">
-            @for (mes of archivo.meses; track mes) {
-              <li>
-                <button
-                  type="button"
-                  class="file-list__mes-item"
-                  [class.file-list__mes-item--active]="isActivo(archivo, mes)"
-                  [attr.aria-pressed]="isActivo(archivo, mes)"
-                  (click)="select(archivo, mes)"
-                >
-                  <span class="file-list__mes-nombre">{{ mes }}</span>
-                  <span class="file-list__mes-archivo" [title]="archivo.nombreArchivo">{{
-                    archivo.nombreArchivo
-                  }}</span>
-                </button>
-              </li>
+
+            <!-- Recorrer los archivos del año -->
+            @for (archivo of grupo.archivos; track archivo.nombreArchivo) {
+
+              <!-- Recorrer los meses de cada archivo -->
+              @for (mes of archivo.meses; track mes) {
+                <li>
+
+                  <!-- Botón para seleccionar el mes -->
+                  <button
+                    type="button"
+                    class="file-list__mes-item"
+                    [class.file-list__mes-item--active]="isActivo(archivo, mes)"
+                    [attr.aria-pressed]="isActivo(archivo, mes)"
+                    (click)="select(archivo, mes)"
+                  >
+
+                    <!-- Nombre del mes -->
+                    <span class="file-list__mes-nombre">
+                      {{ mes }}
+                    </span>
+
+                    <!-- Nombre del archivo -->
+                    <span
+                      class="file-list__mes-archivo"
+                      [title]="archivo.nombreArchivo"
+                    >
+                      {{ archivo.nombreArchivo }}
+                    </span>
+
+                  </button>
+                </li>
+              }
+
             }
+
           </ul>
         }
+
       </li>
     }
+
   </ul>
 </section>
+
