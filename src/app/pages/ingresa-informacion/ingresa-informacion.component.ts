@@ -1,13 +1,16 @@
 import * as XLSX from 'xlsx';
 import { Component, OnInit, computed, signal } from '@angular/core';
 import { forkJoin } from 'rxjs';
+
 import { HeaderComponent } from '../../components/header/header.component';
 import { NavbarComponent } from '../../components/navbar/navbar.component';
+
 import {
   ArchivoCatalogo,
   FileListComponent,
   SeleccionArchivo,
 } from '../../components/file-list/file-list.component';
+
 import { CatalogosService } from '../../services/catalogos.service';
 import { MovimientosService } from '../../services/movimientos.service';
 import { PrediccionesService } from '../../services/predicciones.service';
@@ -44,18 +47,22 @@ export class IngresaInformacionComponent implements OnInit {
     private readonly prediccionesService: PrediccionesService
   ) {}
 
-  protected archivos = signal<ArchivoCatalogo[]>([]);
+  // ============================================================
+  // ARCHIVOS
+  // ============================================================
 
+  protected archivos = signal<ArchivoCatalogo[]>([]);
   protected selectedFile = signal<string>('');
 
-  // =====================================================
+  protected seleccion = signal<SeleccionArchivo | null>(null);
+
+  // ============================================================
   // REENTRENAMIENTO DE MODELOS
-  // =====================================================
+  // ============================================================
 
   protected readonly reentrenando = signal<boolean>(false);
 
   protected onReentrenarModelos(): void {
-
     if (this.reentrenando()) {
       return;
     }
@@ -72,20 +79,19 @@ export class IngresaInformacionComponent implements OnInit {
         console.log('Modelos reentrenados correctamente');
         this.reentrenando.set(false);
       },
-
       error: (error) => {
-        console.error('Error al reentrenar los modelos:', error);
+        console.error(
+          'Error al reentrenar los modelos:',
+          error
+        );
         this.reentrenando.set(false);
       },
     });
   }
 
-  // =====================================================
-  // SELECCIÓN DE ARCHIVO
-  // =====================================================
-
-  // los meses funcionan como filtro: aquí queda el año/mes/archivo exactos que el usuario eligió
-  protected seleccion = signal<SeleccionArchivo | null>(null);
+  // ============================================================
+  // TABLA
+  // ============================================================
 
   protected readonly tituloTabla = computed(() => {
     const s = this.seleccion();
@@ -94,16 +100,6 @@ export class IngresaInformacionComponent implements OnInit {
       ? `${s.nombreArchivo} — ${s.mes} ${s.anio}`
       : this.selectedFile();
   });
-
-  ngOnInit(): void {
-    this.catalogosService
-      .getArchivos()
-      .subscribe((archivos) => this.archivos.set(archivos));
-  }
-
-  // =====================================================
-  // TABLA
-  // =====================================================
 
   protected readonly tablaColumns: TableColumn[] = [
     { key: 'ano', label: 'Año', type: 'text' },
@@ -121,23 +117,21 @@ export class IngresaInformacionComponent implements OnInit {
 
   protected tablaData = signal<TableRow[]>([]);
 
-  // =====================================================
-  // ARCHIVO SELECCIONADO
-  // =====================================================
-
   protected onArchivoSeleccionado(
     seleccion: SeleccionArchivo
   ): void {
+    this.selectedFile.set(
+      seleccion.nombreArchivo
+    );
 
-    this.selectedFile.set(seleccion.nombreArchivo);
     this.seleccion.set(seleccion);
 
-    // nombre_documento filtra por n° de comprobante,
-    // NO por el archivo de origen; no se envía aquí
     this.movimientosService
-      .getDetalle(seleccion.anio, seleccion.mes)
+      .getDetalle(
+        seleccion.anio,
+        seleccion.mes
+      )
       .subscribe((detalle) => {
-
         this.tablaData.set(
           detalle.map((d) => ({
             ano: d.ano ?? '',
@@ -153,64 +147,152 @@ export class IngresaInformacionComponent implements OnInit {
             total: d.total ?? 0,
           }))
         );
-
       });
   }
 
-  // =====================================================
-  // ELIMINAR DOCUMENTO
-  // =====================================================
+  // ============================================================
+  // ELIMINACIÓN
+  // ============================================================
 
+  /**
+   * Controla si se muestra la ventana de confirmación.
+   */
+  protected mostrarConfirmacionEliminar =
+    signal<boolean>(false);
+
+  /**
+   * Indica si actualmente se está eliminando el archivo.
+   */
+  protected eliminandoArchivo =
+    signal<boolean>(false);
+
+  /**
+   * Al presionar "Eliminar Documento"
+   * solamente se abre la ventana de confirmación.
+   *
+   * Aquí NO se llama al backend.
+   */
   protected onEliminarDocumento(): void {
-  const seleccionActual = this.seleccion();
+    const seleccionActual = this.seleccion();
 
-  if (!seleccionActual) {
-    return;
+    if (!seleccionActual) {
+      return;
+    }
+
+    this.mostrarConfirmacionEliminar.set(true);
   }
 
-  this.movimientosService
-    .eliminarMovimientos(
-      seleccionActual.nombreArchivo,
-      seleccionActual.anio,
-      seleccionActual.mes
-    )
-    .subscribe({
-      next: () => {
-        console.log(
-          'Movimientos eliminados correctamente'
-        );
+  /**
+   * El usuario decide NO eliminar.
+   */
+  protected rechazarEliminacion(): void {
+    if (this.eliminandoArchivo()) {
+      return;
+    }
 
-        this.selectedFile.set('');
-        this.seleccion.set(null);
-        this.tablaData.set([]);
-      },
+    this.mostrarConfirmacionEliminar.set(false);
+  }
 
-      error: (error) => {
-        console.error(
-          'Error al eliminar los movimientos:',
-          error
-        );
-      },
-    });
-}
+  /**
+   * El usuario confirma la eliminación.
+   *
+   * Aquí sí se llama al backend.
+   */
+  protected aceptarEliminacion(): void {
+    const seleccionActual = this.seleccion();
 
-  // =====================================================
+    if (!seleccionActual) {
+      return;
+    }
+
+    if (this.eliminandoArchivo()) {
+      return;
+    }
+
+    this.eliminandoArchivo.set(true);
+
+    this.movimientosService
+      .eliminarMovimientos(
+        seleccionActual.nombreArchivo,
+        seleccionActual.anio,
+        seleccionActual.mes
+      )
+      .subscribe({
+        next: () => {
+          console.log(
+            'Movimientos eliminados correctamente'
+          );
+
+          this.eliminandoArchivo.set(false);
+
+          // Cerrar ventana de confirmación
+          this.mostrarConfirmacionEliminar.set(false);
+
+          // Limpiar archivo seleccionado
+          this.selectedFile.set('');
+          this.seleccion.set(null);
+          this.tablaData.set([]);
+
+          // Mostrar mensaje de éxito
+          this.tipoMensaje.set('exito');
+
+          this.mensajeCarga.set(
+            'Archivo eliminado correctamente.'
+          );
+
+          this.mostrarMensaje.set(true);
+
+          // Actualizar la lista de archivos
+          this.catalogosService
+            .getArchivos()
+            .subscribe((archivos) => {
+              this.archivos.set(archivos);
+            });
+        },
+
+        error: (error) => {
+          console.error(
+            'Error al eliminar los movimientos:',
+            error
+          );
+
+          this.eliminandoArchivo.set(false);
+
+          const mensaje =
+            error?.error?.detail ??
+            'Ocurrió un error al eliminar el archivo.';
+
+          // Cerrar confirmación
+          this.mostrarConfirmacionEliminar.set(false);
+
+          // Mostrar error
+          this.tipoMensaje.set('error');
+          this.mensajeCarga.set(mensaje);
+          this.mostrarMensaje.set(true);
+        },
+      });
+  }
+
+  // ============================================================
   // AGREGAR DOCUMENTO
-  // =====================================================
+  // ============================================================
 
   protected onAgregarDocumento(): void {
-
     const nombreNuevo = prompt(
       'Ingresa el nombre del nuevo documento:'
     );
 
-    if (nombreNuevo && nombreNuevo.trim()) {
-
+    if (
+      nombreNuevo &&
+      nombreNuevo.trim()
+    ) {
       const nombre = nombreNuevo.trim();
 
       const nuevoArchivo: ArchivoCatalogo = {
         nombreArchivo: nombre,
-        anio: new Date().getFullYear().toString(),
+        anio: new Date()
+          .getFullYear()
+          .toString(),
         meses: [],
       };
 
@@ -223,80 +305,143 @@ export class IngresaInformacionComponent implements OnInit {
     }
   }
 
-  protected cargandoArchivo = signal<boolean>(false);
+  // ============================================================
+  // CARGAR ARCHIVO
+  // ============================================================
+
+  protected cargandoArchivo =
+    signal<boolean>(false);
 
   protected onCargarDatos(
-  event: Event
-): void {
+    event: Event
+  ): void {
+    const input =
+      event.target as HTMLInputElement;
 
-  const input = event.target as HTMLInputElement;
-  const archivo = input.files?.[0];
+    const archivo =
+      input.files?.[0];
 
-  if (!archivo) {
-    return;
+    if (!archivo) {
+      return;
+    }
+
+    this.cargandoArchivo.set(true);
+
+    this.movimientosService
+      .cargarExcel(archivo)
+      .subscribe({
+        next: (respuesta) => {
+          console.log(
+            'Archivo cargado correctamente:',
+            respuesta
+          );
+
+          this.cargandoArchivo.set(false);
+
+          // Mostrar mensaje de éxito
+          this.tipoMensaje.set('exito');
+
+          this.mensajeCarga.set(
+            'Archivo subido correctamente.'
+          );
+
+          this.mostrarMensaje.set(true);
+
+          // Actualizar lista de archivos
+          this.catalogosService
+            .getArchivos()
+            .subscribe((archivos) => {
+              this.archivos.set(archivos);
+            });
+
+          input.value = '';
+        },
+
+        error: (error) => {
+          console.error(
+            'Error al cargar el archivo:',
+            error
+          );
+
+          this.cargandoArchivo.set(false);
+
+          const mensaje =
+            error?.error?.detail ??
+            'Ocurrió un error al cargar el archivo.';
+
+          this.tipoMensaje.set('error');
+
+          this.mensajeCarga.set(mensaje);
+
+          this.mostrarMensaje.set(true);
+
+          input.value = '';
+        },
+      });
   }
 
-  this.cargandoArchivo.set(true);
+  // ============================================================
+  // MENSAJES
+  // ============================================================
 
-  this.movimientosService
-    .cargarExcel(archivo)
-    .subscribe({
-      next: (respuesta) => {
+  protected mostrarMensaje =
+    signal<boolean>(false);
 
-        console.log(
-          'Archivo cargado correctamente:',
-          respuesta
-        );
+  protected mensajeCarga =
+    signal<string>('');
 
-        this.cargandoArchivo.set(false);
+  protected tipoMensaje =
+    signal<'exito' | 'error'>('exito');
 
-        // Actualizar la lista de archivos
-        this.catalogosService
-          .getArchivos()
-          .subscribe((archivos) => {
-            this.archivos.set(archivos);
-          });
-
-        // Limpiar el input para permitir volver a seleccionar
-        input.value = '';
-      },
-
-      error: (error) => {
-
-        console.error(
-          'Error al cargar el archivo:',
-          error
-        );
-
-        this.cargandoArchivo.set(false);
-
-        input.value = '';
-      },
-    });
-}
-
-protected onDescargarTabla(): void {
-  const datos = this.tablaData();
-
-  if (!datos.length) {
-    return;
+  protected cerrarMensaje(): void {
+    this.mostrarMensaje.set(false);
+    this.mensajeCarga.set('');
   }
 
-  const worksheet = XLSX.utils.json_to_sheet(datos);
+  // ============================================================
+  // DESCARGAR TABLA
+  // ============================================================
 
-  const workbook = XLSX.utils.book_new();
+  protected onDescargarTabla(): void {
+    const datos = this.tablaData();
 
-  XLSX.utils.book_append_sheet(
-    workbook,
-    worksheet,
-    'Información'
-  );
+    if (!datos.length) {
+      return;
+    }
 
-  const nombreArchivo = this.seleccion()
-    ? `${this.seleccion()!.nombreArchivo}_${this.seleccion()!.mes}_${this.seleccion()!.anio}.xlsx`
-    : 'informacion.xlsx';
+    const worksheet =
+      XLSX.utils.json_to_sheet(datos);
 
-  XLSX.writeFile(workbook, nombreArchivo);
+    const workbook =
+      XLSX.utils.book_new();
+
+    XLSX.utils.book_append_sheet(
+      workbook,
+      worksheet,
+      'Información'
+    );
+
+    const nombreArchivo =
+      this.seleccion()
+        ? `${this.seleccion()!.nombreArchivo}_${this.seleccion()!.mes}_${this.seleccion()!.anio}.xlsx`
+        : 'informacion.xlsx';
+
+    XLSX.writeFile(
+      workbook,
+      nombreArchivo
+    );
+  }
+
+  // ============================================================
+  // INICIALIZACIÓN
+  // ============================================================
+
+  ngOnInit(): void {
+    this.catalogosService
+      .getArchivos()
+      .subscribe((archivos) => {
+        this.archivos.set(archivos);
+      });
+  }
 }
 
-}

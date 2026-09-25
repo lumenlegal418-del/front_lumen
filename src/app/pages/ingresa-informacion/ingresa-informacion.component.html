@@ -2,95 +2,318 @@
 <app-navbar />
 
 <main class="pagina">
-  <h1>Ingresar Información</h1>
+
+  <!-- <h1>Ingresar Información</h1> -->
 
   <section class="contenido-wrapper">
 
+    <!-- ========================================= -->
+    <!-- LISTA DE ARCHIVOS -->
+    <!-- ========================================= -->
 
-<div class="seccion-archivos">
-  <app-file-list
-    title="Archivos"
-    [archivos]="archivos()"
-    [(selectedFile)]="selectedFile"
-    (fileSelected)="onArchivoSeleccionado($event)"
-  />
-</div>
+    <div class="seccion-archivos">
 
-<div class="seccion-tabla">
-  @if (selectedFile()) {
-    <app-table
-      [title]="tituloTabla()"
-      [columns]="tablaColumns"
-      [data]="tablaData()"
-    />
-  } @else {
-    <div class="sin-seleccion">
-      Selecciona un archivo para ver los detalles
+      <app-file-list
+        title="Archivos"
+        [archivos]="archivos()"
+        [(selectedFile)]="selectedFile"
+        (fileSelected)="onArchivoSeleccionado($event)"
+      />
+
     </div>
-  }
-</div>
 
+
+    <!-- ========================================= -->
+    <!-- TABLA -->
+    <!-- ========================================= -->
+
+    <div class="seccion-tabla">
+
+      @if (selectedFile()) {
+
+        <app-table
+          [title]="tituloTabla()"
+          [columns]="tablaColumns"
+          [data]="tablaData()"
+        />
+
+      } @else {
+
+        <div class="sin-seleccion">
+          Selecciona un archivo para ver los detalles
+        </div>
+
+      }
+
+    </div>
 
   </section>
+
+
+  <!-- ========================================= -->
+  <!-- BOTONES DE ACCIÓN -->
+  <!-- ========================================= -->
 
   <section class="botones-accion">
 
+    <!-- ELIMINAR DOCUMENTO -->
 
-<!-- ELIMINAR DOCUMENTO -->
-<button
-  type="button"
-  class="btn btn-eliminar"
-  [disabled]="!selectedFile()"
-  (click)="onEliminarDocumento()"
->
-  Eliminar Documento
-</button>
+    <button
+      type="button"
+      class="btn btn-eliminar"
+      [disabled]="
+        !selectedFile() ||
+        eliminandoArchivo()
+      "
+      (click)="onEliminarDocumento()"
+    >
 
-<!-- CARGAR DATOS -->
-<input
-  #archivoInput
-  type="file"
-  accept=".xlsx"
-  hidden
-  (change)="onCargarDatos($event)"
-/>
+      {{
+        eliminandoArchivo()
+          ? 'Eliminando...'
+          : 'Eliminar Documento'
+      }}
 
-<button
-  type="button"
-  class="btn btn-agregar"
-  [disabled]="cargandoArchivo()"
-  (click)="archivoInput.click()"
->
-  {{
-    cargandoArchivo()
-      ? 'Cargando datos...'
-      : 'Cargar datos'
-  }}
-</button>
+    </button>
 
-<button
-  type="button"
-  class="btn btn-descargar"
-  [disabled]="!selectedFile() || tablaData().length === 0"
-  (click)="onDescargarTabla()"
->
-  Descargar información
-</button>
 
-<!-- REENTRENAR MODELOS -->
-<button
-  type="button"
-  class="btn-reentrenar"
-  [disabled]="reentrenando()"
-  (click)="onReentrenarModelos()"
->
-  {{
-    reentrenando()
-      ? 'Reentrenando modelos...'
-      : 'Reentrenar modelos'
-  }}
-</button>
+    <!-- INPUT PARA CARGAR ARCHIVO -->
 
+    <input
+      #archivoInput
+      type="file"
+      accept=".xlsx"
+      hidden
+      (change)="onCargarDatos($event)"
+    />
+
+
+    <!-- CARGAR DATOS -->
+
+    <button
+      type="button"
+      class="btn btn-agregar"
+      [disabled]="cargandoArchivo()"
+      (click)="archivoInput.click()"
+    >
+
+      {{
+        cargandoArchivo()
+          ? 'Cargando datos...'
+          : 'Cargar datos'
+      }}
+
+    </button>
+
+
+    <!-- DESCARGAR INFORMACIÓN -->
+
+    <button
+      type="button"
+      class="btn btn-descargar"
+      [disabled]="
+        !selectedFile() ||
+        tablaData().length === 0
+      "
+      (click)="onDescargarTabla()"
+    >
+
+      Descargar información
+
+    </button>
+
+
+    <!-- REENTRENAR MODELOS -->
+
+    <button
+      type="button"
+      class="btn-reentrenar"
+      [disabled]="reentrenando()"
+      (click)="onReentrenarModelos()"
+    >
+
+      {{
+        reentrenando()
+          ? 'Reentrenando modelos...'
+          : 'Reentrenar modelos'
+      }}
+
+    </button>
 
   </section>
+
+
+  <!-- ================================================= -->
+  <!-- MODAL DE CONFIRMACIÓN DE ELIMINACIÓN -->
+  <!-- ================================================= -->
+
+  @if (mostrarConfirmacionEliminar()) {
+
+    <div
+      class="modal-overlay"
+      (click)="rechazarEliminacion()"
+    >
+
+      <div
+        class="modal-mensaje modal-confirmacion"
+        (click)="$event.stopPropagation()"
+      >
+
+        <!-- ICONO DE ADVERTENCIA -->
+
+        <div class="modal-icono modal-icono-advertencia">
+
+          <span>!</span>
+
+        </div>
+
+
+        <!-- TÍTULO -->
+
+        <h2>
+          Confirmar eliminación
+        </h2>
+
+
+        <!-- MENSAJE -->
+
+        <p>
+
+          ¿Estás seguro de eliminar el archivo
+
+          <strong>
+            {{ seleccion()?.nombreArchivo }}
+          </strong>
+
+          con información del período
+
+          <strong>
+            {{ seleccion()?.mes }}
+            {{ seleccion()?.anio }}
+          </strong>?
+
+        </p>
+
+
+        <!-- BOTONES -->
+
+        <div class="botones-confirmacion">
+
+          <button
+            type="button"
+            class="btn-confirmacion btn-rechazar"
+            [disabled]="eliminandoArchivo()"
+            (click)="rechazarEliminacion()"
+          >
+
+            Rechazar
+
+          </button>
+
+
+          <button
+            type="button"
+            class="btn-confirmacion btn-aceptar"
+            [disabled]="eliminandoArchivo()"
+            (click)="aceptarEliminacion()"
+          >
+
+            {{
+              eliminandoArchivo()
+                ? 'Eliminando...'
+                : 'Aceptar'
+            }}
+
+          </button>
+
+        </div>
+
+      </div>
+
+    </div>
+
+  }
+
+
+  <!-- ================================================= -->
+  <!-- MODAL DE MENSAJE -->
+  <!-- ================================================= -->
+
+  @if (mostrarMensaje()) {
+
+    <div
+      class="modal-overlay"
+      (click)="cerrarMensaje()"
+    >
+
+      <div
+        class="modal-mensaje"
+        [class.modal-error]="
+          tipoMensaje() === 'error'
+        "
+        [class.modal-exito]="
+          tipoMensaje() === 'exito'
+        "
+        (click)="$event.stopPropagation()"
+      >
+
+        <!-- ICONO -->
+
+        <div class="modal-icono">
+
+          @if (tipoMensaje() === 'exito') {
+
+            <span>✓</span>
+
+          } @else {
+
+            <span>!</span>
+
+          }
+
+        </div>
+
+
+        <!-- TÍTULO -->
+
+        <h2>
+
+          @if (tipoMensaje() === 'exito') {
+
+            Operación exitosa
+
+          } @else {
+
+            Error
+
+          }
+
+        </h2>
+
+
+        <!-- MENSAJE -->
+
+        <p>
+          {{ mensajeCarga() }}
+        </p>
+
+
+        <!-- BOTÓN CERRAR -->
+
+        <button
+          type="button"
+          class="btn-modal"
+          (click)="cerrarMensaje()"
+        >
+
+          Cerrar
+
+        </button>
+
+      </div>
+
+    </div>
+
+  }
+
 </main>
