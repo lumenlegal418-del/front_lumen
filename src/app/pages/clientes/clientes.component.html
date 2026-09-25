@@ -2,13 +2,13 @@
 <app-navbar />
 
 <main class="pagina">
-  <h1>Clientes</h1>
+  <h1>Detalle De Ingresos y Egresos</h1>
 
-  <app-filters
-    [filters]="filtros()"
-    (apply)="onAplicarFiltros($event)"
-    (clear)="onLimpiarFiltros()"
-  />
+<app-filters
+  [filters]="filtros()"
+  (apply)="onAplicarFiltros($event)"
+  (clear)="onLimpiarFiltros($event)"
+/>
 
   @if (errorRango()) {
     <p class="clientes-error">{{ errorRango() }}</p>
@@ -16,7 +16,7 @@
 
   <section class="clientes-contenido">
     <app-table
-      title="Listado de clientes"
+      title=""
       [columns]="clientesColumns"
       [data]="clientesData()"
     />
